@@ -2,11 +2,11 @@
 #include "Config.h"
 
 void initOTA() {
-  // Ime, ki ga boš videl v Arduino IDE pod "Ports"
+
   ArduinoOTA.setHostname(mower_name);
   
-  // Opcijsko: dodaj geslo za varnost
-  // ArduinoOTA.setPassword("tvojeGeslo");
+// Optional: add a password for security
+// ArduinoOTA.setPassword("yourPassword");
 
   ArduinoOTA.onStart([]() {
     String type;
