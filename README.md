@@ -15,7 +15,9 @@ The system acts as a real-time middleware layer between:
 System Architecture
 
 [ Ardumower DUE ]
-        ↕ (Serial / PFOD protocol)
+        ↕ 
+(Serial / PFOD protocol)
+
 [ ESP32 Bridge ]
    ↕          ↕
 WiFi (MQTT)   Bluetooth (optional HC-05)
