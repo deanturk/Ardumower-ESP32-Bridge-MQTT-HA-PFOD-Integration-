@@ -16,7 +16,7 @@ extern byte mon_index;
 
 void handleCommBridge() {
   bool staReceived = false;
-  static char mqttProcessingBuffer[256]; // Statičen buffer za varno obdelavo niza
+  static char mqttProcessingBuffer[256]; 
 
   // 1. Manage WiFi PFOD clients (Standard)
   if (TheServeur.hasClient()) {
@@ -42,7 +42,7 @@ void handleCommBridge() {
   }
 
   // 3. Data from DUE (Serial2) -> WiFi/BT in MQTT analize
-  //    DUE sends some 10 data to console starts with #RMSTA: STATE, STATUS, BATVOLT etc 
+  //    DUE sends 10 diferent data into console. String starts with "#RMSTA"...data: STATE, STATUS, BATVOLT etc 
   if (Serial2.available()) {
     inWiFI = 0; // Reset counter for packet 
     
