@@ -7,10 +7,10 @@ extern boolean useMqtt;
 extern unsigned long next_test_connection;
 extern PubSubClient client;
 
-extern HardwareSerial Serial2;  // Da lahko pošiljaš {ra}, {nf}, itd.
-extern String SplitResult[];    // Rezultati razreza niza
+extern HardwareSerial Serial2;  // So you can send {ra}, {nf}, etc..
+extern String SplitResult[];    // String splitting results
 
-// Prenos tvojih spremenljivk
+// Uploading variables
 String SplitResult[10];
 extern const char* mower_name;
 extern const char* mqtt_user;
@@ -18,7 +18,7 @@ extern const char* mqtt_pass;
 extern const char* mqtt_id;
 extern const char* mqtt_subscribeTopic1;
 
-// Topic konstante (jih bova uporabila v esp32_Mqtt_sta)
+// Topic constants (we will use them in esp32_Mqtt_sta)
 extern const char* mqtt_statusTopic;
 extern const char* mqtt_stateTopic;
 extern const char* mqtt_tempTopic;
@@ -53,15 +53,15 @@ void handleMqttConnection() {
 
 void mqttConnect() {
   while (!client.connected()) {
-    Serial.print("Poskus MQTT povezave...");
-    // Poskus povezave z imenom kosilnice
+    Serial.print("Attempting MQTT connection...");
+    // Attempting to connect to the mower name
     if (client.connect(mower_name)) {
-      Serial.println("povezan!");
-      client.subscribe("Mower/COMMAND/#");  // Naročimo se na ukaze
+      Serial.println("conneced!");
+      client.subscribe("Mower/COMMAND/#");  // We subscribe to commands
     } else {
-      Serial.print("napaka, rc=");
+      Serial.print("error, rc=");
       Serial.print(client.state());
-      Serial.println(" poskus čez 5 sekund");
+      Serial.println(" try in 5 seconds");
       delay(5000);
     }
   }
@@ -69,19 +69,19 @@ void mqttConnect() {
 
 void receivedCallback(char* topic, byte* payload, unsigned int payload_length) {  //data coming from mqtt
 
-  if (debug) Serial.println("--- MQTT Sporocilo Prejeto ---");  // DODAJ TO VRSTICO
+  if (debug) Serial.println("--- MQTT Message Received ---");  
   if (debug) Serial.print("Topic: ");
   if (debug) Serial.println(topic);
-  if (debug) Serial.print("Payload Length: ");  // DODAJ TO VRSTICO
-  if (debug) Serial.println(payload_length);    // DODAJ TO VRSTICO
+  if (debug) Serial.print("Payload Length: "); 
+  if (debug) Serial.println(payload_length); 
 
   //convert payload to string
   String payloadString = "";
   for (int i = 0; i < payload_length; i++) {
     payloadString = payloadString + String(((char)payload[i]));
   }
-  if (debug) Serial.print("Payload String: ");  // DODAJ TO VRSTICO
-  if (debug) Serial.println(payloadString);     // DODAJ TO VRSTICO
+  if (debug) Serial.print("Payload String: ");  
+  if (debug) Serial.println(payloadString); 
 
 
   if (payloadString.length() > 0) {
@@ -89,9 +89,9 @@ void receivedCallback(char* topic, byte* payload, unsigned int payload_length) {
     int count = csvSplit(payloadString);
     for (int j = 0; j < count; ++j) {
       if (SplitResult[j].length() > 0) {
-        if (debug) Serial.print("SplitResult[");  // DODAJ TO VRSTICO
+        if (debug) Serial.print("SplitResult[");  
         if (debug) Serial.print(j);
-        if (debug) Serial.print("]: ");  // DODAJ TO VRSTICO
+        if (debug) Serial.print("]: ");
         if (debug) Serial.println(SplitResult[j]);
       }
     }
@@ -123,38 +123,31 @@ void receivedCallback(char* topic, byte* payload, unsigned int payload_length) {
 
   //    MOWER MANUAL CONTROL
   if (SplitResult[0] == "nf") {                                               // "nf" iz Home Assistant payload_press
-    if (debug) Serial.println("Prejeto 'nf'. Posiljam ukaz NAPREJ na Due.");  // DODATNI DEBUG IZPIS
-    Serial2.println("{nf}");                                                  // <--- ZAMENJAJ {f} Z DEJANSKIM UKAZOM ZA NAPREJ NA ARDUMOWERJU!
+    Serial2.println("{nf}");                                                  // <--- REPLACE {f} WITH THE ACTUAL FORWARD COMMAND ON ARDUMOWER!
   }
   if (SplitResult[0] == "nb") {
-    if (debug) Serial.println("Prejeto 'nb'. Posiljam ukaz NAZAJ na Due.");
     Serial2.println("{nb}");
   }
   if (SplitResult[0] == "nl") {
-    if (debug) Serial.println("Prejeto 'nl'. Posiljam ukaz LEVO na Due.");
     Serial2.println("{nl}");
   }
   if (SplitResult[0] == "nr") {
-    if (debug) Serial.println("Prejeto 'nr'. Posiljam ukaz DESNO na Due.");
     Serial2.println("{nr}");
   }
-  if (SplitResult[0] == "nm") {  // "nm" je ukaz iz Ardumower kode
-    if (debug) Serial.println("Prejeto 'nm'. Posiljam ukaz za preklop kosilnega motorja na Due.");
-    Serial2.println("{nm}");  // Ardumower pričakuje "{nm}" za preklop
+  if (SplitResult[0] == "nm") {  // "nm" is a command from the Ardumower code
+    if (debug) Serial.println("Received 'nm'. Sending command to switch mower motor to Due.");
+    Serial2.println("{nm}");  // Ardumower expects "{nm}" to switch
   }
 
-  if (SplitResult[0] == "OBRNI") {
-    if (debug) Serial.println("YOLO: Ukaz OBRNI prejet preko SplitResult! Pošiljam {y01} na DUE.");
+  if (SplitResult[0] == "TURN") {
+    if (debug) Serial.println("YOLO: REVERSE command received via SplitResult! Sending {y01} to DUE.");
     Serial2.println("{y01}");
   }
 
   // MOW MOTOR SETTINGS
   if (String(topic).startsWith("Mower/COMMAND/o")) {
-    // Iz topica izluščimo ukaz (npr. iz "Mower/COMMAND/o05" dobimo "o05")
     String cmd = String(topic).substring(String(topic).lastIndexOf('/') + 1);
-
-    // Sestavimo pfod niz in ga pošljemo na Serial2 (DUE)
-    // Rezultat bo npr: {o05`180}
+    
     Serial2.print("{");
     Serial2.print(cmd);
     if (payloadString.length() > 0) {
@@ -167,18 +160,18 @@ void receivedCallback(char* topic, byte* payload, unsigned int payload_length) {
 //  CONSOLE DATA  #RMSTA, status, state, tempDht, bat, loops, error, yaw, pitch, roll, pattern
 void esp32_Mqtt_sta(char* line_receive) {
 
-  Serial.println("\n==============================");
-  Serial.println("📥 RAW INPUT FROM DUE:");
-  Serial.println(line_receive);
+  // Serial.println("\n==============================");
+  // Serial.println("RAW INPUT FROM DUE:");
+  // Serial.println(line_receive);
 
   // ----------------------------------------------------
-  // 1. varnostna kopija + cleanup
+  // 1. backup + cleanup
   // ----------------------------------------------------
   char tempBuffer[384];
   strncpy(tempBuffer, line_receive, sizeof(tempBuffer));
   tempBuffer[sizeof(tempBuffer) - 1] = '\0';
 
-  // odstrani CR/LF
+  // remove CR/LF
   for (int i = 0; tempBuffer[i]; i++) {
     if (tempBuffer[i] == '\r' || tempBuffer[i] == '\n') {
       tempBuffer[i] = '\0';
@@ -186,9 +179,9 @@ void esp32_Mqtt_sta(char* line_receive) {
     }
   }
 
-  // mora biti RMSTA
+  // must be RMSTA
   if (strncmp(tempBuffer, "#RMSTA", 6) != 0) {
-    Serial.println("❌ Not RMSTA packet - ignored");
+    Serial.println("Not RMSTA packet - ignored");
     return;
   }
 
@@ -205,7 +198,7 @@ void esp32_Mqtt_sta(char* line_receive) {
     token = strtok(NULL, ",");
   }
 
-  Serial.println("📊 SPLIT RESULT:");
+  Serial.println("SPLIT RESULT:");
   for (int j = 0; j < 11; j++) {
     Serial.print("  [");
     Serial.print(j);
@@ -213,9 +206,8 @@ void esp32_Mqtt_sta(char* line_receive) {
     Serial.println(values[j] ? values[j] : "NULL");
   }
 
-  // zaščita
   if (i < 9) {
-    Serial.println("❌ Not enough fields in RMSTA");
+    Serial.println("Not enough fields in RMSTA");
     return;
   }
 
@@ -246,7 +238,7 @@ void esp32_Mqtt_sta(char* line_receive) {
   // ----------------------------------------------------
   // 4. DEBUG JSON
   // ----------------------------------------------------
-  Serial.println("📤 MQTT JSON OUTPUT:");
+  Serial.println("MQTT JSON OUTPUT:");
   Serial.println(json);
 
   // ----------------------------------------------------
@@ -258,12 +250,12 @@ void esp32_Mqtt_sta(char* line_receive) {
   bool ok = client.publish(topic, json);
 
   if (ok) {
-    Serial.println("✅ MQTT publish OK");
+    Serial.println("MQTT publish OK");
   } else {
-    Serial.println("❌ MQTT publish FAILED");
+    Serial.println("MQTT publish FAILED");
   }
 
-  Serial.println("==============================\n");
+  //Serial.println("==============================\n");
 }
 
 
