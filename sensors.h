@@ -1,5 +1,3 @@
-// Funkcije in dekalracije za senzorje
-
 #ifndef SENSORS_H
 #define SENSORS_H
 
