@@ -6,11 +6,11 @@
 #include "mqttHandler.h"
 #include "config.h"
 
-// Deklaracija zunanjih objektov (da jih vidi tudi .cpp)
+
 extern PubSubClient client;
 extern bool debug;
 extern boolean useMqtt;
-// extern unsigned long next_test_connection;   // deklarirano v mqttHandler.h
+// extern unsigned long next_test_connection; 
 extern PubSubClient client;
 
 // Funkcije
