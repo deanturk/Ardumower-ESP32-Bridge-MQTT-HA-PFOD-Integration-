@@ -6,6 +6,6 @@
 #include "BluetoothSerial.h"
 
 void setupCommBridge();
-void handleCommBridge(); // To bo vsebovalo tvoj glavni loop za podatke
+void handleCommBridge(); 
 
 #endif
