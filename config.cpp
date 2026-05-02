@@ -4,9 +4,9 @@ bool debug = true;
 
 // WIFI STATION
 boolean MODE_STA = true;
-const char *ssid = "UG2AE7";
-const char *password = "F9AA74E0";
-IPAddress ip(192, 168, 0, 50);
+const char *ssid = "xxxxxx";
+const char *password = "xxxxxxx";
+IPAddress ip(192, 168, 0, 0);
 IPAddress gateway(192, 168, 0, 1);
 IPAddress netmask(255, 255, 255, 0);
 
