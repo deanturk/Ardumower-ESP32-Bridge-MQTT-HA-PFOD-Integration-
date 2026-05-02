@@ -4,8 +4,8 @@ bool debug = true;
 
 // WIFI STATION
 boolean MODE_STA = true;
-const char *ssid = "xxxxxx";
-const char *password = "xxxxxxx";
+const char *ssid = "xxxxxx";       // YOUR SSID
+const char *password = "xxxxxxx";  // YOUR PASS
 IPAddress ip(192, 168, 0, 0);
 IPAddress gateway(192, 168, 0, 1);
 IPAddress netmask(255, 255, 255, 0);
