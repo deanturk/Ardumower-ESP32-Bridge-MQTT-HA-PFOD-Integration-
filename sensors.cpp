@@ -1,6 +1,6 @@
 #include "sensors.h"
 
-// Dejanska definicija objektov
+// Object definition
 Adafruit_AHTX0 aht;
 Adafruit_BMP280 bmp;
 
