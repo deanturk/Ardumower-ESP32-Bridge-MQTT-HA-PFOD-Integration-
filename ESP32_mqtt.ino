@@ -38,44 +38,43 @@ WiFiClient mqttClient;
 PubSubClient client(mqttClient);
 WiFiServer TheServeur(8881);
 
-// Časomer za senzorje
+// Sensor timer
 unsigned long lastSensorRead = 0;
-const long sensorReadInterval = 1000 * 60 * 5;  // 5 minut
+const long sensorReadInterval = 1000 * 60 * 5;  // 5 min
 
 unsigned long next_test_connection = 0;
 char line_receive[256];
 byte mon_index = 0;
-// bool debug = true; // Če je nimaš že v Config.cpp
 
 void setup() {
   delay(500);
   Serial.begin(115200);
 
-  // Komunikacija z DUE (Serial2)
+  // Comunication with DUE (Serial2)
   Serial2.begin(19200, SERIAL_8N1, 16, 17);
 
-  // 1. Inicializacija senzorjev (AHT/BMP)
+  1. Sensor init (AHT/BMP)
   setupSensors();
 
-  // 2. Inicializacija WiFi povezave (pusti MODE_STA/MODE_AP logiko tukaj ali v CommBridge)
+  // Initialize WiFi connection (leave MODE_STA/MODE_AP logic here or in CommBridge)
   initNetwork();
 
-  // 3. Inicializacija MQTT
+  // 3. Init MQTT
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(receivedCallback);
 
-  // 4. Inicializacija WiFi strežnika za PFOD
+  // 4. Init WiFi server for PFOD
   TheServeur.begin();
   TheServeur.setNoDelay(true);
 
-  if (debug) Serial.println(">>> Sistem je pripravljen in teče! <<<");
+  if (debug) Serial.println(">>> System is ready and runing! <<<");
 }
 
 void loop() {
 
   handleOTA();
   
-  // A. Skrb za MQTT povezavo in poslušanje ukazov
+  // Taking care of the MQTT connection and listening to commands
   if (useMqtt) {
     if (!client.connected()) {
       mqttConnect();
@@ -83,17 +82,17 @@ void loop() {
     client.loop();
   }
 
-  // B. Skrb za prenos podatkov med DUE, WiFi in Bluetooth
+  // B. Taking care of data transfer between DUE, WiFi and Bluetooth
   handleCommBridge();
 
-  // C. Periodično branje senzorjev in pošiljanje v HA
+  // C. Periodic sensor reading and sending to HA
   if (millis() - lastSensorRead > sensorReadInterval) {
     lastSensorRead = millis();
     handleSensorPublish();
   }
 }
 
-// Funkcija za vzpostavitev mreže (prestavljeno iz setup-a za preglednost)
+// Network setup function 
 void initNetwork() {
   if (MODE_STA) {
     if (debug) Serial.println("Start ESP32 Station mode");
